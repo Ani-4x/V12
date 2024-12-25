@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, Button, StyleSheet, ScrollView, SafeAreaView, Alert } from 'react-native';
+import { View, Text, FlatList, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import io from 'socket.io-client';
 import axios from 'axios';
-
-
 
 const socket = io('http://192.168.1.5:5000');
 
@@ -13,67 +11,44 @@ const Extra = ({ route }) => {
     const [message, setMessage] = useState('');
     const [currentUser, setCurrentUser] = useState(null);
 
-
-     /// send message
+    //aend message
 
     const sendMessage = async () => {
         if (userId && currentUser && message.trim()) {
             const msg = {
                 senderId: currentUser,
                 receiverId: userId,
-                message: message,
+                message: message.trim(),
             };
-
-            // send message to Socket.IO
-            socket.emit('sendMessage', msg);
-
-            // Update local state
-
+    
             try {
-                // Add the message to the state
-                setMessages((prev) => {
-                    // Ensure `prev` is an array
-                    if (!Array.isArray(prev)) {
-                        console.error("Previous messages state is not an array:", prev);
-                        return [msg];
-                    }
-                    return [...prev, msg];
-                });
+                // Emit message to Socket.IO
+                socket.emit('SendMessage', msg);
+    
+                // Update local state
+                setMessages((prev) => [...prev, msg]);
+    
+                // Save message to the backend
+                await axios.post(
+                    'http://192.168.1.5:5000/SendMessage',
+                    msg, // Send the message object, not an array
+                    { headers: { 'Content-Type': 'application/json' } } // Ensure proper headers
+                );
+    
+                console.log('Message sent to backend successfully');
             } catch (error) {
-                console.error("Error sending message:", error);
+                console.error('Error sending message to backend:', error.response?.data || error.message);
+                Alert.alert('Error', 'Failed to send the message. Please try again.');
             }
-
-            // save message to backend
-            try {
-                const text = await axios.post('http://192.168.1.5:5000/SendMessage', msg);
-                console.log('message sent to backend')
-            } catch (error) {
-                Alert.alert('Error sending message:', error.text?.data);
-            }
-
-            // clear input field
+    
+            // Clear input field
+            setMessage('');
+        } else {
+            Alert.alert('Validation Error', 'Message cannot be empty.');
         }
-        setMessage('');
     };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /// fetch current user
+    // Fetch current user
     useEffect(() => {
         const fetchCurrentUser = async () => {
             try {
@@ -85,21 +60,15 @@ const Extra = ({ route }) => {
         };
 
         fetchCurrentUser();
-    }, []); 
+    }, []);
 
-
-
-
-
-
-
-    /// fetch messages
+    // Fetch messages
     useEffect(() => {
         const fetchMessages = async () => {
             if (currentUser && userId) {
                 try {
                     const response = await axios.get(`http://192.168.1.5:5000/messages/${currentUser}/${userId}`);
-                    setMessages(response.data._messages);
+                    setMessages(response.data._messages || []);
                 } catch (error) {
                     console.error('Error fetching messages:', error);
                 }
@@ -107,9 +76,9 @@ const Extra = ({ route }) => {
         };
 
         fetchMessages();
-    }, [currentUser, userId]); 
+    }, [currentUser, userId]);
 
-    /// listen for incoming messages
+    // Listen for incoming messages
     useEffect(() => {
         const handleReceiveMessage = (msg) => {
             if (msg.senderId === userId || msg.receiverId === userId) {
@@ -120,12 +89,9 @@ const Extra = ({ route }) => {
         socket.on('receiveMessage', handleReceiveMessage);
 
         return () => {
-            socket.off('receiveMessage', handleReceiveMessage); 
+            socket.off('receiveMessage', handleReceiveMessage);
         };
     }, [userId]);
-
-   
-
 
     return (
         <View style={styles.container}>
@@ -146,61 +112,47 @@ const Extra = ({ route }) => {
                 style={styles.input}
             />
             <Button title="Send" onPress={sendMessage} />
-            
-
-
         </View>
     );
-}
+};
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 10
-    },
-    userBlock: {
-        padding: 15,
-        marginVertical: 10,
-        borderWidth: 1,
-        borderRadius: 8
-    },
-    user: {
-        fontSize: 18
+        padding: 10,
     },
     header: {
         fontSize: 22,
         fontWeight: 'bold',
         marginBottom: 10,
-        alignContent: 'center',
-        alignItems: 'center',
-        alignSelf: 'center',
-        borderBottomWidth: 1
+        textAlign: 'center',
+        borderBottomWidth: 1,
     },
     sent: {
-        textAlign: 'right',
-        color: 'white',
-        margin: 5,
-        borderWidth: 1,
-        borderRadius: 7,
-        fontWeight: 500,
+        alignSelf: 'flex-end',
         backgroundColor: 'green',
-        height: 'auto',
-        alignContent: 'center',
-        textAlignVertical: 'center',
-        marginTop: 5,
-        marginBottom: 5
+        color: 'white',
+        padding: 10,
+        borderRadius: 10,
+        marginVertical: 5,
+        maxWidth: '80%',
     },
     received: {
-        textAlign: 'left',
-        color: 'green',
-        margin: 5
+        alignSelf: 'flex-start',
+        backgroundColor: '#f0f0f0',
+        color: 'black',
+        padding: 10,
+        borderRadius: 10,
+        marginVertical: 5,
+        maxWidth: '80%',
     },
     input: {
         borderWidth: 1,
         padding: 10,
-        margin: 10,
-        borderRadius: 7,
-        backgroundColor: '#000',
-        color: '#fff'
+        marginVertical: 10,
+        borderRadius: 5,
+        backgroundColor: '#fff',
+        color: '#000',
     },
 });
 
