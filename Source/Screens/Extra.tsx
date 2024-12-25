@@ -12,7 +12,7 @@ const Extra = ({ route }) => {
     const [currentUser, setCurrentUser] = useState(null);
 
     //aend message
-
+ 
     const sendMessage = async () => {
         if (userId && currentUser && message.trim()) {
             const msg = {
@@ -23,22 +23,25 @@ const Extra = ({ route }) => {
     
             try {
                 // Emit message to Socket.IO
-                socket.emit('SendMessage', msg);
+                socket.emit('SendMessage', {...msg});
     
                 // Update local state
                 setMessages((prev) => [...prev, msg]);
     
                 // Save message to the backend
-                await axios.post(
+                let response = await axios.post(
                     'http://192.168.1.5:5000/SendMessage',
-                    msg, // Send the message object, not an array
+                    msg, 
                     { headers: { 'Content-Type': 'application/json' } } // Ensure proper headers
+
+                    
                 );
+                return response.msg;
     
-                console.log('Message sent to backend successfully');
+                
             } catch (error) {
-                console.error('Error sending message to backend:', error.response?.data || error.message);
-                Alert.alert('Error', 'Failed to send the message. Please try again.');
+                console.log('Error sending message to backend:', error.message);
+                
             }
     
             // Clear input field
@@ -108,6 +111,7 @@ const Extra = ({ route }) => {
             <TextInput
                 value={message}
                 onChangeText={setMessage}
+                
                 placeholder="Type a message..."
                 style={styles.input}
             />
@@ -120,6 +124,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
+        overflow : 'scroll'
     },
     header: {
         fontSize: 22,
