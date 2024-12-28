@@ -12,7 +12,7 @@ export const useSocket = () => {
 
 export const SocketProvider = (props) => {
        
-     const socket = useMemo(() => io(`http://192.166.1.5:5001`), []);
+     const socket = useMemo(() => io(`http://192.168.1.5:5001`), []);
 
 
 

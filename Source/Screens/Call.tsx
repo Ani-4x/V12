@@ -3,7 +3,7 @@ import { View, Button, StyleSheet } from "react-native";
 import { RTCPeerConnection, mediaDevices, RTCView } from "react-native-webrtc";
 import io from "socket.io-client";
 
-const signalingServer = "http://192.168.56.1:5001"; // Replace with your server URL
+const signalingServer = "http://192.168.1.5:5001"; // Replace with your server URL
 const socket = io(signalingServer);
 
 const Call = ({ route }) => {

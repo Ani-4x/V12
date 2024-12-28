@@ -14,7 +14,7 @@ const LoginSignupScreen = ({ navigation }) => {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('http://192.168.56.1:5000/Login', {
+            const response = await fetch('http://192.168.1.5:5000/Login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }), // Send email and password
