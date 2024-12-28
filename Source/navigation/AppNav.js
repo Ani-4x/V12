@@ -10,7 +10,8 @@ import Chats from '../Screens/Chats';
 
 import Extra from '../Screens/Extra';
 // import DocEditing from '../Screens/DocEditing';
-// import VideoCallScreen from '../Screens/VideoCallScreen';
+import VideoCallScreen from '../Screens/VideoCallScreen';
+import Call from '../Screens/Call';
 
 
 const Stack = createNativeStackNavigator();
@@ -27,8 +28,8 @@ const AppNav = () => {
         <Stack.Screen name="Extra" component={Extra} options={{ headerShown: false }} />
         {/* <Stack.Screen name="fileshr" component={Fileshr} options={{ headerShown: false }} /> */}
         {/* <Stack.Screen name="DocEdit" component={DocEditing} options={{ headerShown: false }} /> */}
-        {/* <Stack.Screen name="VideoScreen" component={VideoCallScreen} options={{ headerShown: false }} /> */}
-
+        <Stack.Screen name="VideoScreen" component={VideoCallScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Call" component={Call} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   )

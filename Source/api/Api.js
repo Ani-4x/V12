@@ -31,3 +31,18 @@ export const Login = async (email, password) => {
 }
 
 
+import io from 'socket.io-client';
+
+const socket = io("http://192.168.1.5:5001");
+
+socket.on("offer", (offer) =>{
+    pc.current.setRemoteDescription(offer);
+});
+
+socket.on("answer", (answer) => {
+    pc.current.setRemoteDescription(answer);
+})
+
+socket.on("ice-candidate", (candidate) => {
+    pc.current.addIceCandidate(candidate);
+})

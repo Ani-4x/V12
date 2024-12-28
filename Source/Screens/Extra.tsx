@@ -70,8 +70,8 @@ const Extra = ({ route }) => {
         const fetchMessages = async () => {
             if (currentUser && userId) {
                 try {
-                    const response = await axios.get(`http://192.168.1.5:5000/messages/${currentUser}/${userId}`);
-                    setMessages(response.data._messages || []);
+                    const response = await axios.get(`http://192.168.1.5:5000/fetchMessage`);
+                    setMessages(response.data.messages || []);
                 } catch (error) {
                     console.error('Error fetching messages:', error);
                 }
