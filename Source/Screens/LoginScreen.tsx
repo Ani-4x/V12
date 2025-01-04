@@ -1,9 +1,13 @@
 // Import necessary modules
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.1.5:5000'; 
+
+const PORT = 80;
+
+
+const API_URL = `http://192.168.56.1:${PORT}` ; 
 
 const LoginSignupScreen = ({ navigation }) => {
     const [isNewUser, setIsNewUser] = useState(false); 
@@ -14,7 +18,7 @@ const LoginSignupScreen = ({ navigation }) => {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('http://192.168.1.5:5000/Login', {
+            const response = await fetch(`http://192.168.56.1:${PORT}/Login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }), // Send email and password
@@ -61,9 +65,11 @@ const LoginSignupScreen = ({ navigation }) => {
                     secureTextEntry
                 />
 
-
-                <Button title="Log In" onPress={handleLogin} />
-
+                <TouchableOpacity style={{borderWidth:1, height:35 , borderRadius:27 , alignContent:'center', backgroundColor:'#fff'}} onPress={handleLogin}>
+                    <Text style={{alignContent:'center', alignItems:'center',alignSelf:'center', backgroundColor:"#fff"}}>
+                    LOGIN
+                    </Text>
+                </TouchableOpacity>
 
                 <Text
                     style={styles.switchText}

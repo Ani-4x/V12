@@ -34,8 +34,10 @@ import DatePicker from 'react-native-date-picker'
 // };
 
 
+const PORT = 80;
 
-const API_URL = 'http://192.168.1.5:5000'
+
+const API_URL = `http://192.168.56.1:${PORT}`
 
 const Signup = ({ navigation }) => {
 
@@ -147,7 +149,12 @@ const styles = StyleSheet.create({
 
     },
     field: {
-        marginTop: 100
+        top: 100,
+        borderRadius:27,
+        color:'#000',
+        backgroundColor:'#000',
+        width:'100%'
+
     },
 
 

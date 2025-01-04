@@ -14,7 +14,7 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     axios({
       method: 'get',
-      url: 'http://192.168.1.5:5000/users',
+      url: 'http://192.168.56.1:80/users',
 
     })
 
@@ -46,7 +46,8 @@ const HomeScreen = ({ navigation }) => {
           <Button title="Contacts" onPress={() => navigation.navigate('Chat')} />
           <Button title="video call" onPress={() => navigation.navigate('VideoScreen')} />
           <Button title="Doc Editing" onPress={() => navigation.navigate('DocEdit')} />
-         
+          <Button title='Analytic' onPress={() => navigation.navigate('Analytics')} />
+
         </View>
 
 
@@ -54,7 +55,7 @@ const HomeScreen = ({ navigation }) => {
 
           <Button title="Log Out" onPress={() => navigation.navigate('Login')} />
 
-          
+
 
         </View>
 

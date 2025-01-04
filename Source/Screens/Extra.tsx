@@ -3,7 +3,7 @@ import { View, Text, FlatList, TextInput, Button, StyleSheet, Alert } from 'reac
 import io from 'socket.io-client';
 import axios from 'axios';
 
-const socket = io('http://192.168.1.5:5000');
+const socket = io('http://192.168.56.1:80');
 
 const Extra = ({ route }) => {
     const { userId, userName } = route.params;
@@ -30,7 +30,7 @@ const Extra = ({ route }) => {
     
                 // Save message to the backend
                 let response = await axios.post(
-                    'http://192.168.1.5:5000/SendMessage',
+                    'http://192.168.56.1:80/SendMessage',
                     msg, 
                     { headers: { 'Content-Type': 'application/json' } } // Ensure proper headers
 
@@ -55,7 +55,7 @@ const Extra = ({ route }) => {
     useEffect(() => {
         const fetchCurrentUser = async () => {
             try {
-                const response = await axios.get('http://192.168.1.5:5000/currentUser');
+                const response = await axios.get('http://192.168.56.1:80/currentUser');
                 setCurrentUser(response.data._id);
             } catch (error) {
                 console.error('Error fetching current user:', error);
@@ -70,7 +70,7 @@ const Extra = ({ route }) => {
         const fetchMessages = async () => {
             if (currentUser && userId) {
                 try {
-                    const response = await axios.get(`http://192.168.1.5:5000/fetchMessage`);
+                    const response = await axios.get(`http://192.168.56.1:80/fetchMessage`);
                     setMessages(response.data.messages || []);
                 } catch (error) {
                     console.error('Error fetching messages:', error);

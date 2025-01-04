@@ -6,7 +6,7 @@ import { AccountContext } from '../context/AccountContext';
 
 
 
-const socket = io('http://192.168.1.5:5000');
+const socket = io('http://192.168.56.1:80');
 
 export default function ChatScreen({ navigation }) {
     const [users, setUsers] = useState([]);
@@ -23,7 +23,7 @@ export default function ChatScreen({ navigation }) {
 
     useEffect(() => {
         const fetchCurrentUser = async () => {
-            const response = await axios.get('http://192.168.1.5:5000/currentUser');  // to get current user
+            const response = await axios.get('http://192.168.56.1:80/currentUser');  // to get current user
             setCurrentUser(response.data._id);
             socket.emit('joinRoom', response.data._id);
         };
@@ -32,7 +32,7 @@ export default function ChatScreen({ navigation }) {
     }, []);
 
     useEffect(() => {
-        axios.get('http://192.168.1.5:5000/users')
+        axios.get('http://192.168.56.1:80/users')
             .then((response) => setUsers(response.data));
 
         socket.emit('joinRoom', setCurrentUser);
