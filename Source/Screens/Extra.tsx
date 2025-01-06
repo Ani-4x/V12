@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, FlatList, TextInput, Alert, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import io from 'socket.io-client';
 import axios from 'axios';
 
@@ -11,69 +11,53 @@ const Extra = ({ route }) => {
     const [message, setMessage] = useState('');
     const [currentUser, setCurrentUser] = useState(null);
 
-    //aend message
- 
     const sendMessage = async () => {
-        if (userId && currentUser && message.trim()) {
-            const msg = {
-                senderId: currentUser,
-                receiverId: userId,
-                message: message.trim(),
-            };
-    
-            try {
-                // Emit message to Socket.IO
-                socket.emit('SendMessage', {...msg});
-    
-                // Update local state
-                setMessages((prev) => [...prev, msg]);
-    
-                // Save message to the backend
-                let response = await axios.post(
-                    'http://192.168.56.1:80/SendMessage',
-                    msg, 
-                    { headers: { 'Content-Type': 'application/json' } } // Ensure proper headers
+        if (!message.trim()) {
+            return Alert.alert('Validation Error', 'Message cannot be empty.');
+        }
 
-                    
-                );
-                return response.msg;
-    
-                
-            } catch (error) {
-                console.log('Error sending message to backend:', error.message);
-                
-            }
-    
-            // Clear input field
+        const msg = {
+            senderId: currentUser,
+            receiverId: userId,
+            message: message.trim(),
+        };
+
+        try {
+            socket.emit('SendMessage', msg);
+            setMessages((prev) => [...prev, msg]);
+            await axios.post('http://192.168.56.1:80/SendMessage', msg, {
+                headers: { 'Content-Type': 'application/json' }
+            });
             setMessage('');
-        } else {
-            Alert.alert('Validation Error', 'Message cannot be empty.');
+        } catch (error) {
+            console.error('Error sending message:', error.message);
+            Alert.alert('Error', 'Failed to send message.');
         }
     };
 
-    // Fetch current user
     useEffect(() => {
         const fetchCurrentUser = async () => {
             try {
                 const response = await axios.get('http://192.168.56.1:80/currentUser');
                 setCurrentUser(response.data._id);
             } catch (error) {
-                console.error('Error fetching current user:', error);
+                Alert.alert('Error', 'Unable to fetch current user.');
             }
         };
 
         fetchCurrentUser();
     }, []);
 
-    // Fetch messages
     useEffect(() => {
         const fetchMessages = async () => {
             if (currentUser && userId) {
                 try {
-                    const response = await axios.get(`http://192.168.56.1:80/fetchMessage`);
+                    const response = await axios.get('http://192.168.56.1:80/fetchMessages', {
+                        params: { senderId: currentUser, receiverId: userId }
+                    });
                     setMessages(response.data.messages || []);
                 } catch (error) {
-                    console.error('Error fetching messages:', error);
+                    console.error('Error fetching messages:', error.message);
                 }
             }
         };
@@ -81,7 +65,6 @@ const Extra = ({ route }) => {
         fetchMessages();
     }, [currentUser, userId]);
 
-    // Listen for incoming messages
     useEffect(() => {
         const handleReceiveMessage = (msg) => {
             if (msg.senderId === userId || msg.receiverId === userId) {
@@ -91,73 +74,117 @@ const Extra = ({ route }) => {
 
         socket.on('receiveMessage', handleReceiveMessage);
 
-        return () => {
-            socket.off('receiveMessage', handleReceiveMessage);
-        };
+        return () => socket.off('receiveMessage', handleReceiveMessage);
     }, [userId]);
 
     return (
-        <View style={styles.container}>
+        <KeyboardAvoidingView
+            
+            style={styles.container}
+        >
             <Text style={styles.header}>{userName}</Text>
+
             <FlatList
                 data={messages}
                 keyExtractor={(item, index) => index.toString()}
+                contentContainerStyle={{ paddingVertical: 15 }}
                 renderItem={({ item }) => (
-                    <Text style={item.senderId === currentUser ? styles.sent : styles.received}>
-                        {item.message}
-                    </Text>
+                    <View
+                        style={item.senderId === currentUser ? styles.sent : styles.received}
+                    >
+                        <Text style={styles.messageText}>{item.message}</Text>
+                    </View>
                 )}
             />
-            <TextInput
-                value={message}
-                onChangeText={setMessage}
-                
-                placeholder="Type a message..."
-                style={styles.input}
-            />
-            <Button title="Send" onPress={sendMessage} />
-        </View>
+
+            <View style={styles.inputContainer}>
+                <TextInput
+                    value={message}
+                    onChangeText={setMessage}
+                    placeholder="Type a message..."
+                    style={styles.input}
+                    placeholderTextColor="#ccc"
+                />
+                <TouchableOpacity onPress={sendMessage} style={styles.sendBtn}>
+                    <Text style={styles.sendBtnText}>Send</Text>
+                </TouchableOpacity>
+            </View>
+        </KeyboardAvoidingView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 10,
-        overflow : 'scroll'
+        backgroundColor: '#1E1E2C',
+        paddingHorizontal: 15,
     },
     header: {
-        fontSize: 22,
+        fontSize: 26,
         fontWeight: 'bold',
-        marginBottom: 10,
         textAlign: 'center',
-        borderBottomWidth: 1,
+        marginVertical: 15,
+        color: '#fff',
     },
     sent: {
         alignSelf: 'flex-end',
-        backgroundColor: 'green',
-        color: 'white',
-        padding: 10,
-        borderRadius: 10,
+        backgroundColor: '#5DB075',
+        padding: 12,
         marginVertical: 5,
-        maxWidth: '80%',
+        borderRadius: 20,
+        borderTopRightRadius: 2,
+        maxWidth: '75%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 6,
     },
     received: {
         alignSelf: 'flex-start',
-        backgroundColor: '#f0f0f0',
-        color: 'black',
-        padding: 10,
-        borderRadius: 10,
+        backgroundColor: '#33334D',
+        padding: 12,
         marginVertical: 5,
-        maxWidth: '80%',
+        borderRadius: 20,
+        borderBottomLeftRadius: 2,
+        maxWidth: '75%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 6,
+    },
+    messageText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+        borderTopWidth: 1,
+        borderColor: '#444',
     },
     input: {
-        borderWidth: 1,
-        padding: 10,
-        marginVertical: 10,
-        borderRadius: 5,
-        backgroundColor: '#fff',
-        color: '#000',
+        flex: 1,
+        backgroundColor: '#2C2C3C',
+        color: '#fff',
+        padding: 12,
+        borderRadius: 25,
+        marginRight: 10,
+        fontSize: 16,
+    },
+    sendBtn: {
+        backgroundColor: '#5DB075',
+        paddingVertical: 12,
+        paddingHorizontal: 25,
+        borderRadius: 25,
+    },
+    sendBtnText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
 });
 

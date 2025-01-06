@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, FlatList, Alert } from 'react-native';
+import { View, Text, Button, StyleSheet, FlatList, Alert, TouchableOpacity } from 'react-native';
 import { getUsers } from '../api/Api';
 import Conversation from '../components/Conversation';
 import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import ChatScreen from './Chats';
 
 
 
 const HomeScreen = ({ navigation }) => {
+
+
+  const MyTabs = createBottomTabNavigator({
+    screens: {
+      Home: HomeScreen,
+      Chat: ChatScreen,
+    },
+  });
 
   const [users, setUsers] = useState([])
 
@@ -34,35 +44,26 @@ const HomeScreen = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{flex:1}}>
 
       <View style={styles.container}>
         <View>
           <Text style={styles.title}>Welcome to the Home Screen!</Text>
         </View>
 
-        <View style={{ alignItems: "stretch", top: 500 }}>
+        <View style={styles.logoutBtn}>
 
-          <Button title="Contacts" onPress={() => navigation.navigate('Chat')} />
-          <Button title="video call" onPress={() => navigation.navigate('VideoScreen')} />
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text>
+              Logout
+            </Text>
+
+          </TouchableOpacity>
+          {/* <Button title="video call" onPress={() => navigation.navigate('VideoScreen')} />
           <Button title="Doc Editing" onPress={() => navigation.navigate('DocEdit')} />
-          <Button title='Analytic' onPress={() => navigation.navigate('Analytics')} />
+          <Button title='Analytic' onPress={() => navigation.navigate('Analytics')} /> */}
 
         </View>
-
-
-        <View style={{ alignItems: "stretch", top: 650 }}>
-
-          <Button title="Log Out" onPress={() => navigation.navigate('Login')} />
-
-
-
-        </View>
-
-
-
-
-
       </View>
     </SafeAreaView>
   );
@@ -72,13 +73,24 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#9cdcfe',
+    backgroundColor: '#2d3b9b',
+    flex: 1,
+
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginTop: 110
+    bottom:280,
+    color: '#fff'
   },
+  logoutBtn: {
+    left: 155,
+    bottom: 340,
+    borderRadius: 7,
+    borderWidth: 1,
+    backgroundColor: 'red',
+    color: '#fff'
+  }
 });
 
 export default HomeScreen;

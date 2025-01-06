@@ -1,56 +1,45 @@
-// Import necessary modules
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
-import axios from 'axios';
-
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 
 const PORT = 80;
-
-
-const API_URL = `http://192.168.56.1:${PORT}` ; 
+const API_URL = `http://192.168.56.1:${PORT}`;
 
 const LoginSignupScreen = ({ navigation }) => {
-    const [isNewUser, setIsNewUser] = useState(false); 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-
-
     const handleLogin = async () => {
         try {
-            const response = await fetch(`http://192.168.56.1:${PORT}/Login`, {
+            const response = await fetch(`${API_URL}/Login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }), // Send email and password
+                body: JSON.stringify({ email, password }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                
-                console.log('Login successful:', data);
                 Alert.alert('Success', 'Login successful!');
-
-            //to homescreen
                 navigation.navigate('Home', { user: data.user });
             } else {
                 Alert.alert('Error', data.error || 'Login failed.');
             }
         } catch (error) {
             console.error(error);
-            Alert.alert('Error', 'Network error.');
+            Alert.alert('Error', 'Network error. Please try again later.');
         }
-
     };
 
     return (
         <View style={styles.container}>
-            <View style={styles.item}>
-                <Text style={styles.title}></Text>
+            <View style={styles.card}>
+                <Text style={styles.title}>Welcome Back</Text>
+                <Text style={styles.subtitle}>Sign in to continue</Text>
 
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
+                    placeholderTextColor="#aaa"
                     value={email}
                     onChangeText={setEmail}
                     keyboardType="email-address"
@@ -60,23 +49,23 @@ const LoginSignupScreen = ({ navigation }) => {
                 <TextInput
                     style={styles.input}
                     placeholder="Password"
+                    placeholderTextColor="#aaa"
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
                 />
 
-                <TouchableOpacity style={{borderWidth:1, height:35 , borderRadius:27 , alignContent:'center', backgroundColor:'#fff'}} onPress={handleLogin}>
-                    <Text style={{alignContent:'center', alignItems:'center',alignSelf:'center', backgroundColor:"#fff"}}>
-                    LOGIN
-                    </Text>
+                <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+                    <Text style={styles.loginText}>Login</Text>
                 </TouchableOpacity>
 
-                <Text
-                    style={styles.switchText}
+                <TouchableOpacity
                     onPress={() => navigation.navigate('Signup')}
                 >
-                    {isNewUser ? 'Already have an account? Log In' : 'New user? Sign Up'}
-                </Text>
+                    <Text style={styles.switchText}>
+                        New user? <Text style={styles.signupText}>Sign Up</Text>
+                    </Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -85,36 +74,69 @@ const LoginSignupScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-
-        padding: 40,
-        backgroundColor: '#9CDCFE'
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#1E1E2C',
+    },
+    card: {
+        width: '90%',
+        padding: 25,
+        borderRadius: 15,
+        backgroundColor: '#29294D',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 8,
     },
     title: {
-        fontSize: 24,
+        fontSize: 30,
         fontWeight: 'bold',
-        marginBottom: 20,
+        color: '#fff',
         textAlign: 'center',
+        marginBottom: 5,
+    },
+    subtitle: {
+        fontSize: 16,
+        color: '#bbb',
+        textAlign: 'center',
+        marginBottom: 30,
     },
     input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        padding: 10,
-        marginBottom: 15,
-        backgroundColor: "#000",
-        color: "#fff",
-
+        borderWidth: 0,
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 20,
+        backgroundColor: '#1E1E30',
+        color: '#fff',
+        fontSize: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    loginButton: {
+        backgroundColor: '#F85391',
+        paddingVertical: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginVertical: 10,
+    },
+    loginText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
     },
     switchText: {
-        marginTop: 20,
-        color: 'blue',
+        color: '#bbb',
         textAlign: 'center',
+        marginTop: 15,
     },
-    item: {
-        marginTop: 200,
-        paddingTop: 1
-    }
+    signupText: {
+        color: '#F57C00',
+        fontWeight: 'bold',
+    },
 });
-
 
 export default LoginSignupScreen;
