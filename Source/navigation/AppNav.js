@@ -1,59 +1,55 @@
-
-import React from 'react'
-import { NavigationContainer, } from '@react-navigation/native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginScreen from '../Screens/LoginScreen';
-import HomeScreen from '../Screens/Homescreen';
-import Signup from '../Screens/Signup';
-import Chats from '../Screens/Chats';
-
-import Extra from '../Screens/Extra';
-// import DocEditing from '../Screens/DocEditing';
-import VideoCallScreen from '../Screens/VideoCallScreen';
-import Call from '../Screens/Call';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import ChatScreen from '../Screens/Chats';
-;
 
+import LoginScreen from '../Screens/LoginScreen';
+import Signup from '../Screens/Signup';
+// import HomeScreen from '../Screens/Homescreen';
+import Chats from '../Screens/Chats';
+import Extra from '../Screens/Extra';
+import VideoCallScreen from '../Screens/VideoCallScreen';
 
-
-const Bottom = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const Bottom = createBottomTabNavigator();
+
+const TabNavigator = () => {
+  return (
+    <Bottom.Navigator screenOptions={({ route }) => ({
+      tabBarIcon: ({ focused, color, size }) => {
+        let iconName;
+        let rn = route.name;
+
+        if (rn === 'Home') {
+          iconName = focused ? 'home' : 'home-outline';
+        } else if (rn === 'Chat') {
+          iconName = focused ? 'fi fi-sr-dialogue-exchange' : 'fi fi-ts-dialogue-exchange';
+        } else if (rn == 'Extra') {
+          iconName = focused ? '' : '';
+        } else if (rn == 'VideoScreen') {
+          iconName = focused ? "" : ""
+        }
+        return null;  // Replace with an icon component like Ionicons
+      },
+    })}>
+      {/* <Bottom.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} /> */}
+      <Bottom.Screen name="Chat" component={Chats} options={{ headerShown: false }} />
+      <Bottom.Screen name="Extra" component={Extra} options={{ headerShown: false }} />
+      <Bottom.Screen name="VideoScreen" component={VideoCallScreen} options={{ headerShown: false }} />
+
+    </Bottom.Navigator>
+  );
+};
 
 const AppNav = () => {
   return (
     <NavigationContainer>
-
-    
-
-
-      <Bottom.Navigator screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-
-          let iconName;
-          let rn = route.name;
-
-          if (rn == HomeScreen) {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (rn == ChatScreen) {
-            iconName = focused ? "fi fi-sr-dialogue-exchange" : 'fi fi-ts-dialogue-exchange';
-          }
-
-        }
-      })} ta  >
-        <Bottom.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-        <Bottom.Screen name="Signup" component={Signup} options={{ headerShown: false }} />
-        <Bottom.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-        <Bottom.Screen name="Chat" component={Chats} options={{ headerShown: false }} />
-        <Bottom.Screen name="Extra" component={Extra} options={{ headerShown: false }} />
-        {/* <Bottom.Screen name="Analytics" component={AnalyticsScreen} options={{headerShown:false}}/> */}
-        {/* <Stack.Screen name="fileshr" component={Fileshr} options={{ headerShown: false }} /> */}
-        {/* <Stack.Screen name="DocEdit" component={DocEditing} options={{ headerShown: false }} /> */}
-        <Stack.Screen name="VideoScreen" component={VideoCallScreen} options={{ headerShown: false }} />
-        {/* <Stack.Screen name="Call" component={Call} options={{ headerShown: false }} /> */}
-      </Bottom.Navigator>
+      <Stack.Navigator >
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Signup" component={Signup} options={{ headerShown: false }} />
+      </Stack.Navigator>
     </NavigationContainer>
-  )
-}
+  );
+};
 
-export default AppNav
+export default AppNav;

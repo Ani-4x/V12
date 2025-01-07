@@ -29,7 +29,7 @@ import axios from 'axios';
 //         const userInfo = await GoogleSignin.signIn();
         
 //         // Send to backend for MongoDB storage
-//         const response = await axios.post('https://your-api-url.com/auth/google', {
+//         const response = await axios.post('https://192.168.56.1:80/auth/google', {
 //           idToken: userInfo.idToken,
 //           user: userInfo.user,
 //         });
@@ -114,7 +114,7 @@ const Signup = ({ navigation }) => {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text style={styles.switchText}>
                         Already have an account? <Text style={styles.loginText}>Log In</Text>
-                        <Button title="Sign in with Google" onPress={handleGoogleSignIn} />
+                        {/* <Button title="Sign in with Google" onPress={handleGoogleSignIn} /> */}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -122,7 +122,8 @@ const Signup = ({ navigation }) => {
     );
 }
 
-export default Signup;
+
+
 
 const styles = StyleSheet.create({
     container: {
@@ -195,3 +196,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
 });
+
+
+export default Signup;

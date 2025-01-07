@@ -98,7 +98,7 @@ const VideoCallScreen = () => {
   return (
     
     <View style={styles.container}>
-      <Text style={styles.heading}>Video Conference</Text>
+      <Text style={styles.heading}>Video</Text>
 
       <View style={styles.videoContainer}>
         {stream && <RTCView streamURL={stream.toURL()} style={styles.video} />}
@@ -127,10 +127,10 @@ const VideoCallScreen = () => {
         </View>
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.button} onPress={toggleMute}>
-            <Text style={styles.buttonText}>Mute/Unmute</Text>
+            <Text style={styles.buttonText}>Mic</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={toggleCamera}>
-            <Text style={styles.buttonText}>Toggle Camera</Text>
+            <Text style={styles.buttonText}>Camera</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -207,9 +207,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 15,
     marginHorizontal: 5,
-    backgroundColor: '#1e88e5',
-    borderRadius: 8,
+    backgroundColor: '#000',
+    borderRadius: 7,
     alignItems: 'center',
+    margin:5
   },
   buttonText: {
     color: '#fff',
