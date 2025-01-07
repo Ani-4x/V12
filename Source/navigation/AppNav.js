@@ -29,7 +29,7 @@ const TabNavigator = () => {
         } else if (rn == 'VideoScreen') {
           iconName = focused ? "" : ""
         }
-        return null;  // Replace with an icon component like Ionicons
+        return null; 
       },
     })}>
       {/* <Bottom.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} /> */}
