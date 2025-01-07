@@ -1,10 +1,9 @@
-import { View, Text } from 'react-native'
+
 import React from 'react'
 import { NavigationContainer, } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../Screens/LoginScreen';
 import HomeScreen from '../Screens/Homescreen';
-import LoginSignupScreen from '../Screens/LoginScreen';
 import Signup from '../Screens/Signup';
 import Chats from '../Screens/Chats';
 
@@ -12,10 +11,9 @@ import Extra from '../Screens/Extra';
 // import DocEditing from '../Screens/DocEditing';
 import VideoCallScreen from '../Screens/VideoCallScreen';
 import Call from '../Screens/Call';
-import AnalyticsScreen from '../Screens/Analytic';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ChatScreen from '../Screens/Chats';
-import { ScreenStack } from 'react-native-screens';
+;
 
 
 

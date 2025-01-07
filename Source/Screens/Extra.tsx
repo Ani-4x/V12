@@ -1,190 +1,155 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, Alert, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import io from 'socket.io-client';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import {
+    View,
+    Text,
+    TextInput,
+    Button,
+    FlatList,
+    StyleSheet,
+} from "react-native";
+import io from "socket.io-client";
 
-const socket = io('http://192.168.56.1:80');
+// Initialize Socket.IO
+const socket = io("http://192.168.56.1:80");
 
 const Extra = ({ route }) => {
-    const { userId, userName } = route.params;
+    const { userId, userName} = route.params;
+
     const [messages, setMessages] = useState([]);
-    const [message, setMessage] = useState('');
-    const [currentUser, setCurrentUser] = useState(null);
+    const [message, setMessage] = useState("");
 
-    const sendMessage = async () => {
-        if (!message.trim()) {
-            return Alert.alert('Validation Error', 'Message cannot be empty.');
-        }
+    // Join user's room and set up event listeners
+    useEffect(() => {
+        // Join the room
+        socket.on("joinRoom", (userId) => {
+            socket.join(userId);
+            console.log(`socketId ${socket.id} joint ${userId}`)
+        });
 
-        const msg = {
-            senderId: currentUser,
-            receiverId: userId,
-            message: message.trim(),
+        // Fetch old messages
+        socket.emit("fetchMessages", { userId, userName }, (fetchedMessages) => {
+            if (fetchedMessages && Array.isArray(fetchedMessages)) {
+                setMessages(fetchedMessages);
+            } else {
+                console.error("Failed to fetch messages or invalid data format");
+                setMessages([]);
+            }
+        });
+
+        // Listen for incoming messages
+        socket.on("receiveMessage", (msg) => {
+            if (
+                (msg.senderId === userId && msg.receiverId === userName) ||
+                (msg.senderId === userName && msg.receiverId === userId)
+            ) {
+                setMessages((prev) => [...prev, msg]);
+            }
+        });
+
+        // Cleanup on unmount
+        return () => {
+            socket.off("receiveMessage"); // Remove the listener
+            socket.disconnect();
         };
+    }, [userId, userName]);
 
-        try {
-            socket.emit('SendMessage', msg);
-            setMessages((prev) => [...prev, msg]);
-            await axios.post('http://192.168.56.1:80/SendMessage', msg, {
-                headers: { 'Content-Type': 'application/json' }
+    // Send a new message
+    const sendMessage = () => {
+        if (message.trim()) {
+            const msg = { senderId: userId, receiverId: userName, message };
+
+            // Emit the message to the server
+            socket.emit("sendMessage", msg, (error) => {
+                if (error) {
+                    console.error("Error sending message:", error);
+                }
             });
-            setMessage('');
-        } catch (error) {
-            console.error('Error sending message:', error.message);
-            Alert.alert('Error', 'Failed to send message.');
+
+            // Update local messages state for instant feedback
+            setMessages((prev) => [...prev, { ...msg, timestamp: new Date() }]);
+            setMessage("");
         }
     };
 
-    useEffect(() => {
-        const fetchCurrentUser = async () => {
-            try {
-                const response = await axios.get('http://192.168.56.1:80/currentUser');
-                setCurrentUser(response.data._id);
-            } catch (error) {
-                Alert.alert('Error', 'Unable to fetch current user.');
-            }
-        };
-
-        fetchCurrentUser();
-    }, []);
-
-    useEffect(() => {
-        const fetchMessages = async () => {
-            if (currentUser && userId) {
-                try {
-                    const response = await axios.get('http://192.168.56.1:80/fetchMessages', {
-                        params: { senderId: currentUser, receiverId: userId }
-                    });
-                    setMessages(response.data.messages || []);
-                } catch (error) {
-                    console.error('Error fetching messages:', error.message);
-                }
-            }
-        };
-
-        fetchMessages();
-    }, [currentUser, userId]);
-
-    useEffect(() => {
-        const handleReceiveMessage = (msg) => {
-            if (msg.senderId === userId || msg.receiverId === userId) {
-                setMessages((prev) => [...prev, msg]);
-            }
-        };
-
-        socket.on('receiveMessage', handleReceiveMessage);
-
-        return () => socket.off('receiveMessage', handleReceiveMessage);
-    }, [userId]);
-
     return (
-        <KeyboardAvoidingView
-            
-            style={styles.container}
-        >
+        <View style={styles.container}>
             <Text style={styles.header}>{userName}</Text>
-
             <FlatList
                 data={messages}
                 keyExtractor={(item, index) => index.toString()}
-                contentContainerStyle={{ paddingVertical: 15 }}
                 renderItem={({ item }) => (
-                    <View
-                        style={item.senderId === currentUser ? styles.sent : styles.received}
+                    <Text
+                        style={
+                            item.senderId === userId
+                                ? styles.sentMessage
+                                : styles.receivedMessage
+                        }
                     >
-                        <Text style={styles.messageText}>{item.message}</Text>
-                    </View>
+                        {item.message}
+                    </Text>
                 )}
+                contentContainerStyle={styles.messageList}
             />
-
             <View style={styles.inputContainer}>
                 <TextInput
+                    style={styles.input}
+                    placeholder="Type a message..."
                     value={message}
                     onChangeText={setMessage}
-                    placeholder="Type a message..."
-                    style={styles.input}
-                    placeholderTextColor="#ccc"
                 />
-                <TouchableOpacity onPress={sendMessage} style={styles.sendBtn}>
-                    <Text style={styles.sendBtnText}>Send</Text>
-                </TouchableOpacity>
+                <Button title="Send" onPress={sendMessage} />
             </View>
-        </KeyboardAvoidingView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#1E1E2C',
-        paddingHorizontal: 15,
+        backgroundColor: "#f8f9fa",
+        padding: 10,
     },
     header: {
-        fontSize: 26,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginVertical: 15,
-        color: '#fff',
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 10,
+        textAlign: "center",
     },
-    sent: {
-        alignSelf: 'flex-end',
-        backgroundColor: '#5DB075',
-        padding: 12,
+    messageList: {
+        flexGrow: 1,
+        justifyContent: "flex-end", // Ensures new messages are displayed at the bottom
+    },
+    sentMessage: {
+        alignSelf: "flex-end",
+        backgroundColor: "#d1ffc4",
+        padding: 10,
+        borderRadius: 15,
         marginVertical: 5,
-        borderRadius: 20,
-        borderTopRightRadius: 2,
-        maxWidth: '75%',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 6,
+        maxWidth: "75%",
     },
-    received: {
-        alignSelf: 'flex-start',
-        backgroundColor: '#33334D',
-        padding: 12,
+    receivedMessage: {
+        alignSelf: "flex-start",
+        backgroundColor: "#f0f0f0",
+        padding: 10,
+        borderRadius: 15,
         marginVertical: 5,
-        borderRadius: 20,
-        borderBottomLeftRadius: 2,
-        maxWidth: '75%',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 6,
-    },
-    messageText: {
-        color: '#fff',
-        fontSize: 16,
+        maxWidth: "75%",
     },
     inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 10,
-        paddingVertical: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 10,
         borderTopWidth: 1,
-        borderColor: '#444',
+        borderTopColor: "#ddd",
+        paddingTop: 10,
     },
     input: {
         flex: 1,
-        backgroundColor: '#2C2C3C',
-        color: '#fff',
-        padding: 12,
-        borderRadius: 25,
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 15,
+        padding: 10,
         marginRight: 10,
-        fontSize: 16,
-    },
-    sendBtn: {
-        backgroundColor: '#5DB075',
-        paddingVertical: 12,
-        paddingHorizontal: 25,
-        borderRadius: 25,
-    },
-    sendBtnText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
     },
 });
 

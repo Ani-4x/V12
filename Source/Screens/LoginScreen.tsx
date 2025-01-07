@@ -20,7 +20,7 @@ const LoginSignupScreen = ({ navigation }) => {
 
             if (response.ok) {
                 Alert.alert('Success', 'Login successful!');
-                navigation.navigate('Home', { user: data.user });
+                navigation.navigate('Chat', { user: data.user });
             } else {
                 Alert.alert('Error', data.error || 'Login failed.');
             }

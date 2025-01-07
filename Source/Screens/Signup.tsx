@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Alert, TouchableOpacity, StyleSheet ,Button } from 'react-native';
+import React, { useState , useEffect } from 'react';
+import { View, Text, TextInput, Alert, TouchableOpacity, StyleSheet ,Button ,} from 'react-native';
 import axios from 'axios';
 
 
@@ -11,34 +11,43 @@ import axios from 'axios';
 
 
 
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+// import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
-GoogleSignin.configure({
-    webClientId: '354383402947-3p679ce69ilpj5pblmrqlu9cen615heg.apps.googleusercontent.com', // From Firebase console
-    offlineAccess: true,
-});
+// GoogleSignin.configure({
+//     webClientId: '354383402947-3p679ce69ilpj5pblmrqlu9cen615heg.apps.googleusercontent.com', // From Firebase console
+//     offlineAccess: true,
+// });
+
+// const GoogleSignInScreen = () => {
+//     useEffect(() => {
+//       GoogleSignin.signOut(); // Optional: Sign out on component mount for fresh login
+//     }, []);
+  
+//     const handleGoogleSignIn = async () => {
+//       try {
+//         await GoogleSignin.hasPlayServices();
+//         const userInfo = await GoogleSignin.signIn();
+        
+//         // Send to backend for MongoDB storage
+//         const response = await axios.post('https://your-api-url.com/auth/google', {
+//           idToken: userInfo.idToken,
+//           user: userInfo.user,
+//         });
+  
+//         Alert.alert('Success', `Welcome ${response.data.name}`);
+        
+//       } catch (error) {
+//         if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+//           Alert.alert('Cancelled', 'Sign in cancelled');
+//         } else if (error.code === statusCodes.IN_PROGRESS) {
+//           Alert.alert('Signing in', 'In progress...');
+//         } else {
+//           Alert.alert('Error', 'Something went wrong');
+//         }
+//       }
+//     };
 
 
-
-const onGoogleButtonPress = async () => {
-    try {
-        // Sign in with Google
-        const { idToken } = await GoogleSignin.signIn();
-
-        // Create a Google credential with the token
-        const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
-        // Sign in the user with the credential
-        const userCredential = await auth().signInWithCredential(googleCredential);
-
-        // Access user information
-        const { user } = userCredential;
-        console.log('User Info:', user);
-        return user;
-    } catch (error) {
-        console.error(error);
-    }
-};
 
 const PORT = 80;
 const API_URL = `http://192.168.56.1:${PORT}`;
@@ -57,7 +66,7 @@ const Signup = ({ navigation }) => {
             }
             else {response.status === 200 
                 Alert.alert('Success', 'Account created successfully!');
-                navigation.navigate('Home')};
+                navigation.navigate('Chat')};
             
         } catch (error) {
             Alert.alert('Error', error.response?.data?.message || 'Signup failed. Please try again.');
@@ -105,13 +114,13 @@ const Signup = ({ navigation }) => {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text style={styles.switchText}>
                         Already have an account? <Text style={styles.loginText}>Log In</Text>
-                          <Button title="Sign in with Google" onPress={onGoogleButtonPress} />
+                        <Button title="Sign in with Google" onPress={handleGoogleSignIn} />
                     </Text>
                 </TouchableOpacity>
             </View>
         </View>
     );
-};
+}
 
 export default Signup;
 
